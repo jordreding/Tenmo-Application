@@ -22,7 +22,8 @@ public class AccountController {
         this.accountDao = accountDao;
     }
 
-    @RequestMapping(path="/balance", method = RequestMethod.GET)
+    @PreAuthorize("hasRole('USER')")
+    @RequestMapping(path="balance", method = RequestMethod.GET)
     public BigDecimal getAccountBalance(Principal principal) {
         return accountDao.getAccountBalance(principal.getName());
     }
