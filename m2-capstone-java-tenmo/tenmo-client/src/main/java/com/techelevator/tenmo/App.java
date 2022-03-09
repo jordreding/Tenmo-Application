@@ -62,6 +62,8 @@ public class App {
         currentUser = authenticationService.login(credentials);
         if (currentUser == null) {
             consoleService.printErrorMessage();
+        } else {
+            accountService.setUser(currentUser); //TODO: Added this
         }
     }
 

@@ -17,15 +17,19 @@ import java.security.Principal;
 public class AccountController {
 
     private AccountDao accountDao;
+    private UserDao userDao;
 
-    public AccountController(AccountDao accountDao) {
+    public AccountController(AccountDao accountDao, UserDao userDao) {
         this.accountDao = accountDao;
+        this.userDao = userDao;
     }
 
-    @PreAuthorize("hasRole('USER')")
-    @RequestMapping(path="balance", method = RequestMethod.GET)
+    @PreAuthorize("permitAll")
+    @RequestMapping(path="/balance", method = RequestMethod.GET)
     public BigDecimal getAccountBalance(Principal principal) {
-        return accountDao.getAccountBalance(principal.getName());
+        String name = principal.getName();
+        BigDecimal accountBalance = accountDao.getAccountBalance(name);
+        return accountBalance;
     }
 
 }

@@ -1,7 +1,10 @@
 package com.techelevator.tenmo.services;
 
 import com.techelevator.tenmo.model.AuthenticatedUser;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpHeaders;
 
 import java.math.BigDecimal;
 
@@ -20,7 +23,12 @@ public class AccountService {
     }
 
     public BigDecimal getBalance() {
-        return restTemplate.getForObject(baseUrl + "balance", BigDecimal.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(user.getToken());
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+        BigDecimal balance = restTemplate.exchange(baseUrl + "balance", HttpMethod.GET, entity, BigDecimal.class).getBody();
+
+        return balance;
     }
 
 
