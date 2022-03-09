@@ -1,10 +1,12 @@
 package com.techelevator.tenmo.services;
 
 
+import com.techelevator.tenmo.model.User;
 import com.techelevator.tenmo.model.UserCredentials;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Scanner;
 
 public class ConsoleService {
@@ -89,8 +91,38 @@ public class ConsoleService {
         System.out.println("An error occurred. Check the log for details.");
     }
 
+    public void printUserDoesNotExistMessage() {
+        System.out.println("User does not exist, please enter a valid user id.");
+    }
+
     public void printBalance(BigDecimal balance) {
         System.out.println("Your current account balance is: $" + balance);
+    }
+
+    public void printAllUsersNotCurrentUser(List<User> userList) {
+        System.out.println("--------------------------------------------------------");
+        System.out.println("Users");
+        System.out.printf("%-15s%-25s\n", "ID", "Name");
+        System.out.println("--------------------------------------------------------");
+
+        for (User user : userList) {
+            System.out.printf("%-15d%-25s\n", user.getId(), user.getUsername());
+        }
+        System.out.println("-----------------------------");
+    }
+
+    public int promptForRecipientId() {
+        System.out.println("Enter ID of user you are sending to (0 to cancel): ");
+        String strId = scanner.nextLine();
+        int id = Integer.parseInt(strId);
+        return id;
+    }
+
+    public int promptForAmountToSend() {
+        System.out.println("Enter amount: ");
+        String strAmount = scanner.nextLine();
+        int amount = Integer.parseInt(strAmount);
+        return amount;
     }
 
 }
