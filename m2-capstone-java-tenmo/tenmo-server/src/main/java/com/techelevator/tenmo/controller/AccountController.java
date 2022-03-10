@@ -5,6 +5,7 @@ import com.techelevator.tenmo.dao.AccountDao;
 import com.techelevator.tenmo.dao.TransactionDao;
 import com.techelevator.tenmo.dao.UserDao;
 import com.techelevator.tenmo.model.Account;
+import com.techelevator.tenmo.model.Transaction;
 import com.techelevator.tenmo.model.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,10 +40,11 @@ public class AccountController {
         return userDao.getAllUsersNotCurrentUser(principal.getName());
     }
     @ResponseStatus(HttpStatus.CREATED)
-    @RequestMapping(path = "/account/{username}/transaction", method = RequestMethod.POST)
-    public void createTransaction(@PathVariable String username, @RequestBody int recipientId, @RequestBody BigDecimal amount, Principal principal) {
-        transactionDao.create(recipientId, amount, principal.getName());
+    @RequestMapping(path = "/account/{username}/transaction/send", method = RequestMethod.POST)
+    public Transaction createTransaction(@RequestBody Transaction transaction, @PathVariable String username, Principal principal) {
+        return transactionDao.createSentApprovedTransaction(transaction, principal.getName());
     }
+
 
 
 

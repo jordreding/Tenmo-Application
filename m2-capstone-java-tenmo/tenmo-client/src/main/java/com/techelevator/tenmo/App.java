@@ -1,12 +1,13 @@
 package com.techelevator.tenmo;
 
 import com.techelevator.tenmo.model.AuthenticatedUser;
+import com.techelevator.tenmo.model.Transaction;
 import com.techelevator.tenmo.model.User;
 import com.techelevator.tenmo.model.UserCredentials;
 import com.techelevator.tenmo.services.AccountService;
 import com.techelevator.tenmo.services.AuthenticationService;
 import com.techelevator.tenmo.services.ConsoleService;
-import com.techelevator.tenmo.services.TransferService;
+import com.techelevator.tenmo.services.TransactionService;
 import io.cucumber.java.bs.A;
 
 import java.math.BigDecimal;
@@ -18,8 +19,9 @@ public class App {
 
     private final ConsoleService consoleService = new ConsoleService();
     private final AccountService accountService = new AccountService(API_BASE_URL);
-    private final TransferService transferService = new TransferService(API_BASE_URL);
+    private final TransactionService transactionService = new TransactionService(API_BASE_URL);
     private final AuthenticationService authenticationService = new AuthenticationService(API_BASE_URL);
+    private BigDecimal currentBalance;
 
     private AuthenticatedUser currentUser;
 
@@ -67,7 +69,8 @@ public class App {
         if (currentUser == null) {
             consoleService.printErrorMessage();
         } else {
-            accountService.setUser(currentUser); //TODO: Added this
+            accountService.setUser(currentUser);
+            transactionService.setUser(currentUser);
         }
     }
 
@@ -83,6 +86,7 @@ public class App {
             } else if (menuSelection == 3) {
                 viewPendingRequests();
             } else if (menuSelection == 4) {
+                listUsers();
                 sendBucks();
             } else if (menuSelection == 5) {
                 requestBucks();
@@ -96,8 +100,8 @@ public class App {
     }
 
 	private void viewCurrentBalance() {
-		// TODO Auto-generated method stub
         BigDecimal balance = accountService.getBalance();
+        currentBalance = balance;
         consoleService.printBalance(balance);
 	}
 
@@ -111,26 +115,14 @@ public class App {
 		
 	}
 
-
-
-	private void sendBucks() {
+    private void listUsers() {
         List<User> userList = accountService.getAllUsersNotCurrentUser();
         consoleService.printAllUsersNotCurrentUser(userList);
-        int recipientId = consoleService.promptForRecipientId();
-        boolean userDoesNotExist = false;
-        while (!userDoesNotExist) {
-            if (accountService.checkForRecipientId(userList, recipientId)) {
-                BigDecimal amountToSend = consoleService.promptForAmountToSend();
-                userDoesNotExist = true;
+    }
 
-            } else if (recipientId == 0) {
-                break;
-            } else {
-                consoleService.printUserDoesNotExistMessage();
-                recipientId = consoleService.promptForRecipientId();
-            }
-        }
-        mainMenu();
+	private void sendBucks() {
+        Transaction transaction = consoleService.getTransactionFromUser(currentBalance);
+        transactionService.addSendTransaction(transaction);
 	}
 
 

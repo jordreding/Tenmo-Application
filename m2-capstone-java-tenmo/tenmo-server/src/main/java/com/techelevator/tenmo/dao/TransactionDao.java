@@ -1,8 +1,10 @@
 package com.techelevator.tenmo.dao;
 
+import com.techelevator.tenmo.model.Transaction;
+
 import java.math.BigDecimal;
 
 public interface TransactionDao {
 
-    void create(Integer recipientId, BigDecimal amount, String username);
+    Transaction createSentApprovedTransaction(Transaction transaction, String accountFromName);
 }

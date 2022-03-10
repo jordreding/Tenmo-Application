@@ -1,6 +1,7 @@
 package com.techelevator.tenmo.services;
 
 
+import com.techelevator.tenmo.model.Transaction;
 import com.techelevator.tenmo.model.User;
 import com.techelevator.tenmo.model.UserCredentials;
 
@@ -111,19 +112,36 @@ public class ConsoleService {
         System.out.println("-----------------------------");
     }
 
-    public int promptForRecipientId() {
-        System.out.println("Enter ID of user you are sending to (0 to cancel): ");
-        String strId = scanner.nextLine();
-        int id = Integer.parseInt(strId);
-        return id;
+    public Transaction getTransactionFromUser(BigDecimal currentBalance) {
+        Transaction transaction = new Transaction();
+        transaction.setUserIdTo(promptForInt("Enter ID of user you are sending to (0 to cancel): "));
+        transaction.setAmount(promptForBigDecimal("Enter amount: "));
+        transaction.setTransfer_status_id(2);
+        transaction.setTransfer_type_id(2);
+        return transaction;
     }
 
-    public BigDecimal promptForAmountToSend() {
-        System.out.println("Enter amount: ");
-        String strAmount = scanner.nextLine();
-        int amount = Integer.parseInt(strAmount);
-        BigDecimal bigAmount = new BigDecimal(amount);
-        return bigAmount;
+//    public double promptForAmountToSend(BigDecimal currentBalance) {
+//
+//        System.out.println("Enter amount: ");
+//        String strAmount = scanner.nextLine();
+//        double amount = Double.parseDouble(strAmount);
+//        return amount;
+//    }
+//
+//    public int promptForRecipientUserId() {
+//        System.out.println("Enter ID of user you are sending to (0 to cancel): ");
+//        String strId = scanner.nextLine();
+//        int id = Integer.parseInt(strId);
+//        return id;
+//    }
+
+    public boolean hasSufficientFunds(double amount, BigDecimal currentBalance) {
+        return true;
+    }
+
+    public boolean isNotZeroOrNegative(double amount) {
+        return amount > 0;
     }
 
 }
