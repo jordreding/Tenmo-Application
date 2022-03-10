@@ -43,7 +43,17 @@ public class AccountService {
 
         return userList;
     }
-    
+
+    public boolean checkForRecipientId(List<User> userList, int recipientId) {
+        for (User user : userList) {
+            if (user.getId() == recipientId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 
 
 

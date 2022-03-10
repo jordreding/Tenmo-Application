@@ -2,16 +2,16 @@ package com.techelevator.tenmo.controller;
 
 import ch.qos.logback.core.db.BindDataSourceToJNDIAction;
 import com.techelevator.tenmo.dao.AccountDao;
+import com.techelevator.tenmo.dao.TransactionDao;
 import com.techelevator.tenmo.dao.UserDao;
 import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.User;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.security.Principal;
 import java.util.List;
 
@@ -20,11 +20,13 @@ import java.util.List;
 public class AccountController {
 
     private AccountDao accountDao;
+    private TransactionDao transactionDao;
     private UserDao userDao;
 
-    public AccountController(AccountDao accountDao, UserDao userDao) {
+    public AccountController(AccountDao accountDao, UserDao userDao, TransactionDao transactionDao) {
         this.accountDao = accountDao;
         this.userDao = userDao;
+        this.transactionDao = transactionDao;
     }
 
     @RequestMapping(path="/account/{username}/balance", method = RequestMethod.GET)
@@ -35,6 +37,11 @@ public class AccountController {
     @RequestMapping(path="/account", method = RequestMethod.GET)
     public List<User> getAllUsersNotCurrentUser(Principal principal) {
         return userDao.getAllUsersNotCurrentUser(principal.getName());
+    }
+    @ResponseStatus(HttpStatus.CREATED)
+    @RequestMapping(path = "/account/{username}/transaction", method = RequestMethod.POST)
+    public void createTransaction(@PathVariable String username, @RequestBody int recipientId, @RequestBody BigDecimal amount, Principal principal) {
+        transactionDao.create(recipientId, amount, principal.getName());
     }
 
 

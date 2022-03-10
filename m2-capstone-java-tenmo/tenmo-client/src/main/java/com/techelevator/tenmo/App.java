@@ -6,6 +6,7 @@ import com.techelevator.tenmo.model.UserCredentials;
 import com.techelevator.tenmo.services.AccountService;
 import com.techelevator.tenmo.services.AuthenticationService;
 import com.techelevator.tenmo.services.ConsoleService;
+import com.techelevator.tenmo.services.TransferService;
 import io.cucumber.java.bs.A;
 
 import java.math.BigDecimal;
@@ -17,6 +18,7 @@ public class App {
 
     private final ConsoleService consoleService = new ConsoleService();
     private final AccountService accountService = new AccountService(API_BASE_URL);
+    private final TransferService transferService = new TransferService(API_BASE_URL);
     private final AuthenticationService authenticationService = new AuthenticationService(API_BASE_URL);
 
     private AuthenticatedUser currentUser;
@@ -109,16 +111,18 @@ public class App {
 		
 	}
 
+
+
 	private void sendBucks() {
-        boolean userDoesNotExist = false;
         List<User> userList = accountService.getAllUsersNotCurrentUser();
         consoleService.printAllUsersNotCurrentUser(userList);
         int recipientId = consoleService.promptForRecipientId();
+        boolean userDoesNotExist = false;
         while (!userDoesNotExist) {
-            if (checkForRecipientId(userList, recipientId)) {
-                int amountToSend = consoleService.promptForAmountToSend();
-
+            if (accountService.checkForRecipientId(userList, recipientId)) {
+                BigDecimal amountToSend = consoleService.promptForAmountToSend();
                 userDoesNotExist = true;
+
             } else if (recipientId == 0) {
                 break;
             } else {
@@ -129,14 +133,6 @@ public class App {
         mainMenu();
 	}
 
-    private boolean checkForRecipientId(List<User> userList, int recipientId) {
-        for (User user : userList) {
-            if (user.getId() == recipientId) {
-                return true;
-            }
-        }
-        return false;
-    }
 
 	private void requestBucks() {
 		// TODO Auto-generated method stub

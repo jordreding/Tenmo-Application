@@ -118,11 +118,12 @@ public class ConsoleService {
         return id;
     }
 
-    public int promptForAmountToSend() {
+    public BigDecimal promptForAmountToSend() {
         System.out.println("Enter amount: ");
         String strAmount = scanner.nextLine();
         int amount = Integer.parseInt(strAmount);
-        return amount;
+        BigDecimal bigAmount = new BigDecimal(amount);
+        return bigAmount;
     }
 
 }
