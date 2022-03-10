@@ -115,33 +115,27 @@ public class ConsoleService {
     public Transaction getTransactionFromUser(BigDecimal currentBalance) {
         Transaction transaction = new Transaction();
         transaction.setUserIdTo(promptForInt("Enter ID of user you are sending to (0 to cancel): "));
-        transaction.setAmount(promptForBigDecimal("Enter amount: "));
+        BigDecimal amount = promptForBigDecimal("Enter amount: ");
+        if (hasSufficientFunds(amount, currentBalance) && isNotZeroOrNegative(amount)) {
+            transaction.setAmount(amount);
+        } else {
+            transaction.setAmount(new BigDecimal(0));
+        }
         transaction.setTransfer_status_id(2);
         transaction.setTransfer_type_id(2);
         return transaction;
     }
 
-//    public double promptForAmountToSend(BigDecimal currentBalance) {
-//
-//        System.out.println("Enter amount: ");
-//        String strAmount = scanner.nextLine();
-//        double amount = Double.parseDouble(strAmount);
-//        return amount;
-//    }
-//
-//    public int promptForRecipientUserId() {
-//        System.out.println("Enter ID of user you are sending to (0 to cancel): ");
-//        String strId = scanner.nextLine();
-//        int id = Integer.parseInt(strId);
-//        return id;
-//    }
-
-    public boolean hasSufficientFunds(double amount, BigDecimal currentBalance) {
-        return true;
+    public boolean hasSufficientFunds(BigDecimal amount, BigDecimal currentBalance) {
+        return currentBalance.compareTo(amount) == 1;
     }
 
-    public boolean isNotZeroOrNegative(double amount) {
-        return amount > 0;
+    public boolean isNotZeroOrNegative(BigDecimal amount) {
+        return amount.compareTo(new BigDecimal(0)) == 1;
+    }
+
+    public void printInsufficientOrNegativeAmount() {
+        System.out.println("Please enter a positive number less than your current balance.");
     }
 
 }

@@ -121,8 +121,14 @@ public class App {
     }
 
 	private void sendBucks() {
+        BigDecimal balance = accountService.getBalance();
+        currentBalance = balance;
         Transaction transaction = consoleService.getTransactionFromUser(currentBalance);
-        transactionService.addSendTransaction(transaction);
+        if (transaction.getAmount().compareTo(new BigDecimal(0)) == 1) {
+            transactionService.addSendTransaction(transaction);
+        } else {
+            consoleService.printInsufficientOrNegativeAmount();
+        }
 	}
 
 

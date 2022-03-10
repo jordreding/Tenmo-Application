@@ -3,9 +3,11 @@ package com.techelevator.tenmo.controller;
 import ch.qos.logback.core.db.BindDataSourceToJNDIAction;
 import com.techelevator.tenmo.dao.AccountDao;
 import com.techelevator.tenmo.dao.TransactionDao;
+import com.techelevator.tenmo.dao.TransactionRecordDao;
 import com.techelevator.tenmo.dao.UserDao;
 import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.Transaction;
+import com.techelevator.tenmo.model.TransactionRecord;
 import com.techelevator.tenmo.model.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,12 +24,14 @@ public class AccountController {
 
     private AccountDao accountDao;
     private TransactionDao transactionDao;
+    private TransactionRecordDao transactionRecordDao;
     private UserDao userDao;
 
-    public AccountController(AccountDao accountDao, UserDao userDao, TransactionDao transactionDao) {
+    public AccountController(AccountDao accountDao, UserDao userDao, TransactionDao transactionDao, TransactionRecordDao transactionRecordDao) {
         this.accountDao = accountDao;
         this.userDao = userDao;
         this.transactionDao = transactionDao;
+        this.transactionRecordDao = transactionRecordDao;
     }
 
     @RequestMapping(path="/account/{username}/balance", method = RequestMethod.GET)
@@ -44,6 +48,12 @@ public class AccountController {
     public Transaction createTransaction(@RequestBody Transaction transaction, @PathVariable String username, Principal principal) {
         return transactionDao.createSentApprovedTransaction(transaction, principal.getName());
     }
+
+    @RequestMapping(path="/account/{username}/transaction", method = RequestMethod.GET)
+    public List<TransactionRecord> getRecordOfUserTransactions(@PathVariable String username, Principal principal) {
+        return transactionRecordDao.getAllTransactions(principal.getName());
+    }
+
 
 
 
