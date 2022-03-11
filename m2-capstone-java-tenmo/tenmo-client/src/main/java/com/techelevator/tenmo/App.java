@@ -120,32 +120,25 @@ public class App {
 		
 	}
 
-//    private void listUsers() {
-//        List<User> userList = accountService.getAllUsersNotCurrentUser();
-//        consoleService.printAllUsersNotCurrentUser(userList);
-//    }
-
 	private void sendBucks() {
         List<User> userList = accountService.getAllUsersNotCurrentUser();
         consoleService.printAllUsersNotCurrentUser(userList);
         BigDecimal balance = accountService.getBalance();
         currentBalance = balance;
-        Transaction transaction = consoleService.getTransactionFromUser(currentBalance, userList);
-        if (transaction.getAmount().compareTo(USER_DOES_NOT_EXIST_AMOUNT) != 0) {
-            if (transaction.getAmount().compareTo(new BigDecimal(0)) == 1) {
-                transactionService.addSendTransaction(transaction);
-            } else {
-                consoleService.printInsufficientOrNegativeAmount();
-            }
-        } else {
-            consoleService.printNonexistentUser();
+        Transaction transaction = consoleService.buildSentTransactionFromUser(currentBalance, userList);
+        if (consoleService.ensureValidAmount(transaction)) {
+            transactionService.addSendTransaction(transaction);
         }
 	}
 
 
 	private void requestBucks() {
-		// TODO Auto-generated method stub
-		
-	}
+        List<User> userList = accountService.getAllUsersNotCurrentUser();
+        consoleService.printAllUsersNotCurrentUser(userList);
+        Transaction requestTransaction = consoleService.buildPendingTransactionFromUser(userList);
+        if (consoleService.ensureValidAmount(requestTransaction)) {
+            transactionService.addSendTransaction(requestTransaction);
+        }
+    }
 
 }

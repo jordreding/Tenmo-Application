@@ -59,6 +59,12 @@ public class AccountController {
         return transactionDao.getTransaction(transferId);
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
+    @RequestMapping(path = "/account/{username}/transaction/request", method = RequestMethod.POST)
+    public Transaction createPendingTransaction(@RequestBody Transaction transaction, @PathVariable String username, Principal principal) {
+        return transactionDao.createRequestedPendingTransaction(transaction, principal.getName());
+    }
+
 
 
 

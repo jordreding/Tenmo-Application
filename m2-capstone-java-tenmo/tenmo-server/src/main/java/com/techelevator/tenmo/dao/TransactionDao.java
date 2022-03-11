@@ -8,4 +8,5 @@ public interface TransactionDao {
 
     Transaction createSentApprovedTransaction(Transaction transaction, String accountFromName);
     Transaction getTransaction(int transferId);
+    Transaction createRequestedPendingTransaction(Transaction transaction, String accountFromName);
 }

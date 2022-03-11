@@ -114,10 +114,28 @@ public class ConsoleService {
         System.out.println("-----------------------------");
     }
 
-    public Transaction getTransactionFromUser(BigDecimal currentBalance, List<User> userList) {
+    public Transaction buildSentTransactionFromUser(BigDecimal currentBalance, List<User> userList) {
         Transaction transaction = new Transaction();
         transaction.setUserIdTo(promptForInt("Enter ID of user you are sending to (0 to cancel): "));
         BigDecimal amount = promptForBigDecimal("Enter amount: ");
+        setProperTransactionAmountOrErrorAmounts(transaction, userList, amount, currentBalance);
+        transaction.setTransfer_status_id(2);
+        transaction.setTransfer_type_id(2);
+        return transaction;
+    }
+
+    public Transaction buildPendingTransactionFromUser(List<User> userList) {
+        Transaction transaction = new Transaction();
+        transaction.setUserIdTo(promptForInt("Enter ID of user you are requesting from (0 to cancel): "));
+        BigDecimal amount = promptForBigDecimal("Enter amount: ");
+        setProperTransactionAmountOrErrorAmounts(transaction, userList, amount);
+        transaction.setTransfer_status_id(1);
+        transaction.setTransfer_type_id(1);
+        return transaction;
+    }
+
+
+    public void setProperTransactionAmountOrErrorAmounts(Transaction transaction, List<User> userList, BigDecimal amount, BigDecimal currentBalance) {
         if (hasSufficientFunds(amount, currentBalance) && isNotZeroOrNegative(amount)) {
             if (userListContainsUserToSend(userList, transaction.getUserIdTo())) {
                 transaction.setAmount(amount);
@@ -127,9 +145,32 @@ public class ConsoleService {
         } else {
             transaction.setAmount(new BigDecimal(0));
         }
-        transaction.setTransfer_status_id(2);
-        transaction.setTransfer_type_id(2);
-        return transaction;
+    }
+
+    public void setProperTransactionAmountOrErrorAmounts(Transaction transaction, List<User> userList, BigDecimal amount) {
+        if (isNotZeroOrNegative(amount)) {
+            if (userListContainsUserToSend(userList, transaction.getUserIdTo())) {
+                transaction.setAmount(amount);
+            } else {
+                transaction.setAmount(USER_DOES_NOT_EXIST_AMOUNT);
+            }
+        } else {
+            transaction.setAmount(new BigDecimal(0));
+        }
+    }
+
+    public boolean ensureValidAmount(Transaction transaction) {
+        if (transaction.getAmount().compareTo(USER_DOES_NOT_EXIST_AMOUNT) != 0) {
+            if (transaction.getAmount().compareTo(new BigDecimal(0)) == 1) {
+                return true;
+            } else {
+                printInsufficientOrNegativeAmount();
+                return false;
+            }
+        } else {
+            printNonexistentUser();
+            return false;
+        }
     }
 
     private boolean userListContainsUserToSend(List<User> userList, int userId) {

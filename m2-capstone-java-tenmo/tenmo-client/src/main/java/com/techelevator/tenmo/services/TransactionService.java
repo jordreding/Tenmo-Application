@@ -35,6 +35,17 @@ public class TransactionService {
         return sentTransaction;
     }
 
+    public Transaction addRequestTransaction(Transaction requestTransaction) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(user.getToken());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Transaction> entity = new HttpEntity<Transaction>(requestTransaction, headers);
+        String username = user.getUser().getUsername();
+        Transaction requestedTransaction = restTemplate.exchange(baseUrl + "account/" + username + "/transaction/request", HttpMethod.POST, entity, Transaction.class).getBody();
+
+        return requestedTransaction;
+    }
+
     public Transaction getTransactionByTransferId(int transferId) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(user.getToken());

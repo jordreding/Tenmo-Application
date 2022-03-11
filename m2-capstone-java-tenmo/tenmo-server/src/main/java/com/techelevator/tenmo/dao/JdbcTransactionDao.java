@@ -39,6 +39,19 @@ public class JdbcTransactionDao implements TransactionDao {
     }
 
     @Override
+    @ResponseStatus(HttpStatus.CREATED)
+    public Transaction createRequestedPendingTransaction(Transaction transaction, String accountFromName) {
+        int accountFrom = getAccountIdFromUsername(accountFromName);
+        int accountTo = getAccountNumberFromUserId(transaction.getUserIdTo());
+        String sql = "INSERT INTO transfer (transfer_type_id, transfer_status_id, account_from," +
+                " account_to, amount) VALUES (?, ?, ?, ?, ?) RETURNING transfer_id";
+        Long id = jdbcTemplate.queryForObject(sql, Long.class, transaction.getTransfer_type_id(), transaction.getTransfer_status_id(),
+                accountFrom, accountTo, transaction.getAmount());
+        transaction.setTransferId(id);
+        return transaction;
+    }
+
+    @Override
     public Transaction getTransaction(int transferId) throws UsernameNotFoundException {
         String sql = "SELECT transfer_id, transfer_type_id, transfer_status_id, " +
                 "account_from, account_to, amount " +
@@ -48,7 +61,6 @@ public class JdbcTransactionDao implements TransactionDao {
         if (row.next()) {
             Transaction transactionIncomplete = mapRowToTransaction(row);
             return getNamesForTransactionByAccountId(transactionIncomplete);
-
         }
         throw new UsernameNotFoundException("TransferId: " + transferId + " was not found.");
     }
