@@ -107,8 +107,12 @@ public class App {
 		List<TransactionRecord> transactionRecords = transactionRecordService.getAllTransactionRecords();
         consoleService.printTransactionRecords(transactionRecords);
         int transferIdToView = consoleService.promptForInt("Please Enter Transfer ID to view details (0 to cancel): ");
-        Transaction transaction = transactionService.getTransactionByTransferId(transferIdToView);
-        consoleService.printTransactionToView(transaction);
+        if (transactionService.transferIdExists(transactionRecords, transferIdToView)) {
+            Transaction transaction = transactionService.getTransactionByTransferId(transferIdToView);
+            consoleService.printTransactionToView(transaction);
+        } else {
+            consoleService.transactionIdDoesNotExists();
+        }
 	}
 
 	private void viewPendingRequests() {

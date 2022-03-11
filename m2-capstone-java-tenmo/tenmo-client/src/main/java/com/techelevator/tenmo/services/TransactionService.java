@@ -2,11 +2,14 @@ package com.techelevator.tenmo.services;
 
 import com.techelevator.tenmo.model.AuthenticatedUser;
 import com.techelevator.tenmo.model.Transaction;
+import com.techelevator.tenmo.model.TransactionRecord;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpHeaders;
+
+import java.util.List;
 
 public class TransactionService {
     private final RestTemplate restTemplate = new RestTemplate();
@@ -38,6 +41,15 @@ public class TransactionService {
         HttpEntity<Void> entity = new HttpEntity<>(headers);
         Transaction transaction = restTemplate.exchange(baseUrl + "account/" + user.getUser().getUsername() + "/transaction/" + transferId, HttpMethod.GET, entity, Transaction.class).getBody();
         return transaction;
+    }
+
+    public boolean transferIdExists(List<TransactionRecord> records, int transferId) {
+        for (TransactionRecord record : records) {
+            if (record.getTransferId() == transferId) {
+                return true;
+            }
+        }
+        return false;
     }
 
 

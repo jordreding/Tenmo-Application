@@ -199,4 +199,8 @@ public class ConsoleService {
         }
     }
 
+    public void transactionIdDoesNotExists() {
+        System.out.println("Transfer Id does not exist. Please choose an Id from the above list.");
+    }
+
 }
