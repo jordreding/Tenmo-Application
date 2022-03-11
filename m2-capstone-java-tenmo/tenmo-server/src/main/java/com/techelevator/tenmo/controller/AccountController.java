@@ -49,9 +49,14 @@ public class AccountController {
         return transactionDao.createSentApprovedTransaction(transaction, principal.getName());
     }
 
-    @RequestMapping(path="/account/{username}/transaction", method = RequestMethod.GET)
-    public List<TransactionRecord> getRecordOfUserTransactions(@PathVariable String username, Principal principal) {
-        return transactionRecordDao.getAllTransactions(principal.getName());
+    @RequestMapping(path="/account/{username}/transaction/approved", method = RequestMethod.GET)
+    public List<TransactionRecord> getRecordOfUserApprovedTransactions(@PathVariable String username, Principal principal) {
+        return transactionRecordDao.getAllApprovedTransactions(principal.getName());
+    }
+
+    @RequestMapping(path="/account/{username}/transaction/pending", method = RequestMethod.GET)
+    public List<TransactionRecord> getRecordOfUserPendingTransactions(@PathVariable String username, Principal principal) {
+        return transactionRecordDao.getAllPendingTransactions(principal.getName());
     }
 
     @RequestMapping(path="/account/{username}/transaction/{transferId}", method = RequestMethod.GET)

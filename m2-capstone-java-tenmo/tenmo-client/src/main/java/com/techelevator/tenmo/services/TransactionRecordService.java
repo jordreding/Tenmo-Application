@@ -26,13 +26,23 @@ public class TransactionRecordService {
         this.user = user;
     }
 
-    public List<TransactionRecord> getAllTransactionRecords() {
+    public List<TransactionRecord> getAllApprovedTransactionRecords() {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(user.getToken());
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Void> entity = new HttpEntity<>(headers);
         String username = user.getUser().getUsername();
-        TransactionRecord[] transactionRecords = restTemplate.exchange(baseUrl + "account/" + username + "/transaction", HttpMethod.GET, entity, TransactionRecord[].class).getBody();
+        TransactionRecord[] transactionRecords = restTemplate.exchange(baseUrl + "account/" + username + "/transaction/approved", HttpMethod.GET, entity, TransactionRecord[].class).getBody();
+        return Arrays.asList(transactionRecords);
+    }
+
+    public List<TransactionRecord> getAllPendingTransactionRecords() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(user.getToken());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+        String username = user.getUser().getUsername();
+        TransactionRecord[] transactionRecords = restTemplate.exchange(baseUrl + "account/" + username + "/transaction/pending", HttpMethod.GET, entity, TransactionRecord[].class).getBody();
         return Arrays.asList(transactionRecords);
     }
 

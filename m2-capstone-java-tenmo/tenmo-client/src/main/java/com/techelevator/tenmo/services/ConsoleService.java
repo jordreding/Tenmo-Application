@@ -198,7 +198,7 @@ public class ConsoleService {
         System.out.println("Please enter a user Id from the list above.");
     }
 
-    public void printTransactionRecords(List<TransactionRecord> records) {
+    public void printApprovedTransactionRecords(List<TransactionRecord> records) {
         System.out.println("--------------------------------------------------------");
         System.out.println("Transfers");
         System.out.printf("%-15s%-25s%-40s\n", "ID", "From/To", "Amount");
@@ -206,6 +206,18 @@ public class ConsoleService {
 
         for (TransactionRecord record : records) {
             System.out.printf("%-15s%-4s: %-19s$ %-10.2f\n", record.getTransferId(), record.getTransferType(), record.getUsername(), record.getAmount());
+        }
+        System.out.println("-----------------------------");
+    }
+
+    public void printPendingTransactionRecords(List<TransactionRecord> records) {
+        System.out.println("--------------------------------------------------------");
+        System.out.println("Pending Transfers");
+        System.out.printf("%-15s%-25s%-40s\n", "ID", "To", "Amount");
+        System.out.println("--------------------------------------------------------");
+
+        for (TransactionRecord record : records) {
+            System.out.printf("%-19s%-19s$ %-10.2f\n", record.getTransferId(),  record.getUsername(), record.getAmount());
         }
         System.out.println("-----------------------------");
     }

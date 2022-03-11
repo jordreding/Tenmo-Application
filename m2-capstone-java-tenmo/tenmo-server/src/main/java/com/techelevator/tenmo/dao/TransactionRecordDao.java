@@ -6,5 +6,6 @@ import java.util.List;
 
 public interface TransactionRecordDao {
 
-    List<TransactionRecord> getAllTransactions(String username);
+    List<TransactionRecord> getAllApprovedTransactions(String username);
+    List<TransactionRecord> getAllPendingTransactions(String username);
 }

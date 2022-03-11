@@ -2,7 +2,6 @@ package com.techelevator.tenmo;
 
 import com.techelevator.tenmo.model.*;
 import com.techelevator.tenmo.services.*;
-import io.cucumber.java.bs.A;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -104,8 +103,8 @@ public class App {
 	}
 
 	private void viewTransferHistory() {
-		List<TransactionRecord> transactionRecords = transactionRecordService.getAllTransactionRecords();
-        consoleService.printTransactionRecords(transactionRecords);
+		List<TransactionRecord> transactionRecords = transactionRecordService.getAllApprovedTransactionRecords();
+        consoleService.printApprovedTransactionRecords(transactionRecords);
         int transferIdToView = consoleService.promptForInt("Please Enter Transfer ID to view details (0 to cancel): ");
         if (transactionService.transferIdExists(transactionRecords, transferIdToView)) {
             Transaction transaction = transactionService.getTransactionByTransferId(transferIdToView);
@@ -116,8 +115,15 @@ public class App {
 	}
 
 	private void viewPendingRequests() {
-		// TODO Auto-generated method stub
-		
+        List<TransactionRecord> transactionRecords = transactionRecordService.getAllPendingTransactionRecords();
+        consoleService.printPendingTransactionRecords(transactionRecords);
+        int transferIdToView = consoleService.promptForInt("Please Enter Transfer ID to view details (0 to cancel): ");
+        if (transactionService.transferIdExists(transactionRecords, transferIdToView)) {
+            Transaction transaction = transactionService.getTransactionByTransferId(transferIdToView);
+            consoleService.printTransactionToView(transaction);
+        } else {
+            consoleService.transactionIdDoesNotExists();
+        }
 	}
 
 	private void sendBucks() {

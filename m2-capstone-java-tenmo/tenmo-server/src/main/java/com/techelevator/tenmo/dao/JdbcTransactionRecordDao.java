@@ -21,25 +21,35 @@ public class JdbcTransactionRecordDao implements TransactionRecordDao {
     }
 
     @Override
-    public List<TransactionRecord> getAllTransactions(String username){
+    public List<TransactionRecord> getAllApprovedTransactions(String username){
         List<TransactionRecord> fullListOfTransaction = new ArrayList<>();
-        List<TransactionRecord> transactionsSentToUser = getTransactionsSentToUser(username);
-        List<TransactionRecord> transactionsSentFromUser = getTransactionsSentFromUser(username);
+        List<TransactionRecord> transactionsSentToUser = getTransactionsSentToUser(username, 2);
+        List<TransactionRecord> transactionsSentFromUser = getTransactionsSentFromUser(username,2);
         fullListOfTransaction.addAll(transactionsSentFromUser);
         fullListOfTransaction.addAll(transactionsSentToUser);
         return fullListOfTransaction;
 
      }
 
-     private List<TransactionRecord> getTransactionsSentToUser(String username) {
+     @Override
+     public List<TransactionRecord> getAllPendingTransactions(String username) {
+         List<TransactionRecord> fullListOfTransaction = new ArrayList<>();
+         List<TransactionRecord> transactionsSentFromUser = getTransactionsSentToUser(username, 1);
+         fullListOfTransaction.addAll(transactionsSentFromUser);
+         return fullListOfTransaction;
+     }
+
+
+
+     private List<TransactionRecord> getTransactionsSentToUser(String username, int statusId) {
         List<TransactionRecord> transactionsSentToUser = new ArrayList<>();
         int accountNumber = getAccountIdFromUsername(username);
 
         String sql = "SELECT transfer_id, transfer_type_id, username, amount FROM transfer " +
                 "JOIN account ON account.account_id = transfer.account_to " +
                 "JOIN tenmo_user ON tenmo_user.user_id = account.user_id " +
-                "WHERE account_from = ?";
-        SqlRowSet rows = jdbcTemplate.queryForRowSet(sql, accountNumber);
+                "WHERE account_from = ? AND transfer_status_id = ?";
+        SqlRowSet rows = jdbcTemplate.queryForRowSet(sql, accountNumber, statusId);
         while (rows.next()) {
             TransactionRecord record = mapRowToRecord(rows);
             record.setTransferType("TO");
@@ -48,14 +58,14 @@ public class JdbcTransactionRecordDao implements TransactionRecordDao {
         return transactionsSentToUser;
      }
 
-    private List<TransactionRecord> getTransactionsSentFromUser(String username) {
+    private List<TransactionRecord> getTransactionsSentFromUser(String username, int statusId) {
         List<TransactionRecord> transactionsSentToUser = new ArrayList<>();
         int accountNumber = getAccountIdFromUsername(username);
         String sql = "SELECT transfer_id, transfer_type_id, username, amount FROM transfer " +
                 "JOIN account ON account.account_id = transfer.account_from " +
                 "JOIN tenmo_user ON tenmo_user.user_id = account.user_id " +
-                "WHERE account_to = ?";
-        SqlRowSet rows = jdbcTemplate.queryForRowSet(sql, accountNumber);
+                "WHERE account_to = ? AND transfer_status_id = ?";
+        SqlRowSet rows = jdbcTemplate.queryForRowSet(sql, accountNumber, statusId);
         while (rows.next()) {
             TransactionRecord record = mapRowToRecord(rows);
             record.setTransferType("FROM");
@@ -63,6 +73,7 @@ public class JdbcTransactionRecordDao implements TransactionRecordDao {
         }
         return transactionsSentToUser;
     }
+
 
     private TransactionRecord mapRowToRecord(SqlRowSet rows) {
         TransactionRecord record = new TransactionRecord();
