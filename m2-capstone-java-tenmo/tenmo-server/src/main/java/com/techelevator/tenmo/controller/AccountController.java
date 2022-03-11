@@ -70,6 +70,12 @@ public class AccountController {
         return transactionDao.createRequestedPendingTransaction(transaction, principal.getName());
     }
 
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @RequestMapping(path = "/account/{username}/transaction/request/{transferId}", method = RequestMethod.PUT)
+    public void updateRequest(@PathVariable String username, @RequestBody int userChoice, @PathVariable int transferId, Principal principal) {
+        transactionDao.updateRequestedPendingTransaction(transferId, userChoice);
+    }
+
 
 
 

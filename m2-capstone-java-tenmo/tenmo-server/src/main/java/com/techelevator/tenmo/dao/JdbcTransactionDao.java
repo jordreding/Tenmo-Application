@@ -52,6 +52,17 @@ public class JdbcTransactionDao implements TransactionDao {
     }
 
     @Override
+    public void updateRequestedPendingTransaction(int transferId, int userUpdateChoice) {
+        if (userUpdateChoice == 1) {
+            BigDecimal amount = getAmountFromTransferId(transferId);
+            int userAccount = getSenderAccount(transferId);
+            int recipientAccount = getRecipientAccount(transferId);
+            requestedPendingTransactionApproved(amount, transferId, userAccount, recipientAccount);
+        }
+
+    }
+
+    @Override
     public Transaction getTransaction(int transferId) throws UsernameNotFoundException {
         String sql = "SELECT transfer_id, transfer_type_id, transfer_status_id, " +
                 "account_from, account_to, amount " +
@@ -63,6 +74,33 @@ public class JdbcTransactionDao implements TransactionDao {
             return getNamesForTransactionByAccountId(transactionIncomplete);
         }
         throw new UsernameNotFoundException("TransferId: " + transferId + " was not found.");
+    }
+
+    private BigDecimal getAmountFromTransferId(int transferId) {
+        String sql = "SELECT amount FROM transfer WHERE transfer_id = ?;";
+        BigDecimal amount = new BigDecimal(jdbcTemplate.queryForObject(sql, Double.class, transferId));
+        return amount;
+    }
+
+    private void requestedPendingTransactionApproved(BigDecimal amount, int transferId, int senderAccountId, int recipientAccountId) {
+        String sql = "UPDATE transfer " +
+                "SET transfer_status_id = ? " +
+                "WHERE transfer_id = ?";
+        jdbcTemplate.update(sql, 2, transferId);
+        subtractFromSendersAccount(amount, senderAccountId);
+        addToRecipientAccount(amount, recipientAccountId);
+    }
+
+    private int getSenderAccount(int transferId) {
+        String sql = "SELECT account_from FROM transfer WHERE transfer_id = ?";
+        Integer accountFrom = jdbcTemplate.queryForObject(sql, Integer.class, transferId);
+        return accountFrom;
+    }
+
+    private int getRecipientAccount(int transferId) {
+        String sql = "SELECT account_to FROM transfer WHERE transfer_id = ?";
+        Integer accountTo = jdbcTemplate.queryForObject(sql, Integer.class, transferId);
+        return accountTo;
     }
 
     private int getAccountIdFromUsername(String username) {
