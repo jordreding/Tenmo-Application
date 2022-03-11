@@ -54,6 +54,10 @@ public class AccountController {
         return transactionRecordDao.getAllTransactions(principal.getName());
     }
 
+    @RequestMapping(path="/account/{username}/transaction/{transferId}", method = RequestMethod.GET)
+    public Transaction getTransaction(@PathVariable String username, @PathVariable int transferId) {
+        return transactionDao.getTransaction(transferId);
+    }
 
 
 

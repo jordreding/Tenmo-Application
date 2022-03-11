@@ -2,6 +2,7 @@ package com.techelevator.tenmo.services;
 
 
 import com.techelevator.tenmo.model.Transaction;
+import com.techelevator.tenmo.model.TransactionRecord;
 import com.techelevator.tenmo.model.User;
 import com.techelevator.tenmo.model.UserCredentials;
 
@@ -127,7 +128,7 @@ public class ConsoleService {
     }
 
     public boolean hasSufficientFunds(BigDecimal amount, BigDecimal currentBalance) {
-        return currentBalance.compareTo(amount) == 1;
+        return currentBalance.compareTo(amount) > -1;
     }
 
     public boolean isNotZeroOrNegative(BigDecimal amount) {
@@ -136,6 +137,48 @@ public class ConsoleService {
 
     public void printInsufficientOrNegativeAmount() {
         System.out.println("Please enter a positive number less than your current balance.");
+    }
+
+    public void printTransactionRecords(List<TransactionRecord> records) {
+        System.out.println("--------------------------------------------------------");
+        System.out.println("Transfers");
+        System.out.printf("%-15s%-25s%-40s\n", "ID", "From/To", "Amount");
+        System.out.println("--------------------------------------------------------");
+
+        for (TransactionRecord record : records) {
+            System.out.printf("%-15s%-4s: %-19s$ %-10.2f\n", record.getTransferId(), record.getTransferType(), record.getUsername(), record.getAmount());
+        }
+        System.out.println("-----------------------------");
+    }
+
+    public void printTransactionToView(Transaction transaction) {
+        System.out.println("--------------------------------------------------------");
+        System.out.println("Transfer Details");
+        System.out.println("--------------------------------------------------------");
+        System.out.println("Id: " + transaction.getTransferId());
+        System.out.println("From: " + transaction.getFromName());
+        System.out.println("To: " + transaction.getToName());
+        System.out.println("Type: " + getTypeFromTypeId(transaction.getTransfer_type_id()));
+        System.out.println("Status: " + getStatusFromStatusId(transaction.getTransfer_status_id()));
+        System.out.printf("Amount: $%.2f\n", transaction.getAmount());
+    }
+
+    private String getTypeFromTypeId(int typeId) {
+        if (typeId == 2) {
+            return "Send";
+        } else {
+            return "Request";
+        }
+    }
+
+    private String getStatusFromStatusId(int statusId) {
+        if (statusId == 1) {
+            return "Pending";
+        } else if (statusId == 2) {
+            return "Approved";
+        } else {
+            return "Rejected";
+        }
     }
 
 }

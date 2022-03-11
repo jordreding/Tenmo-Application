@@ -6,6 +6,8 @@ public class Transaction {
     private int transferId;
     private int transfer_type_id;
     private int transfer_status_id;
+    private String fromName;
+    private String toName;
     private int accountFrom;
     private int userIdTo;
     private BigDecimal amount;
@@ -32,6 +34,22 @@ public class Transaction {
 
     public void setTransfer_status_id(int transfer_status_id) {
         this.transfer_status_id = transfer_status_id;
+    }
+
+    public String getFromName() {
+        return fromName;
+    }
+
+    public void setFromName(String fromName) {
+        this.fromName = fromName;
+    }
+
+    public String getToName() {
+        return toName;
+    }
+
+    public void setToName(String toName) {
+        this.toName = toName;
     }
 
     public int getAccountFrom() {

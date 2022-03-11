@@ -1,13 +1,7 @@
 package com.techelevator.tenmo;
 
-import com.techelevator.tenmo.model.AuthenticatedUser;
-import com.techelevator.tenmo.model.Transaction;
-import com.techelevator.tenmo.model.User;
-import com.techelevator.tenmo.model.UserCredentials;
-import com.techelevator.tenmo.services.AccountService;
-import com.techelevator.tenmo.services.AuthenticationService;
-import com.techelevator.tenmo.services.ConsoleService;
-import com.techelevator.tenmo.services.TransactionService;
+import com.techelevator.tenmo.model.*;
+import com.techelevator.tenmo.services.*;
 import io.cucumber.java.bs.A;
 
 import java.math.BigDecimal;
@@ -21,6 +15,7 @@ public class App {
     private final AccountService accountService = new AccountService(API_BASE_URL);
     private final TransactionService transactionService = new TransactionService(API_BASE_URL);
     private final AuthenticationService authenticationService = new AuthenticationService(API_BASE_URL);
+    private final TransactionRecordService transactionRecordService = new TransactionRecordService(API_BASE_URL);
     private BigDecimal currentBalance;
 
     private AuthenticatedUser currentUser;
@@ -71,6 +66,7 @@ public class App {
         } else {
             accountService.setUser(currentUser);
             transactionService.setUser(currentUser);
+            transactionRecordService.setUser(currentUser);
         }
     }
 
@@ -106,8 +102,11 @@ public class App {
 	}
 
 	private void viewTransferHistory() {
-		// TODO Auto-generated method stub
-		
+		List<TransactionRecord> transactionRecords = transactionRecordService.getAllTransactionRecords();
+        consoleService.printTransactionRecords(transactionRecords);
+        int transferIdToView = consoleService.promptForInt("Please Enter Transfer ID to view details (0 to cancel): ");
+        Transaction transaction = transactionService.getTransactionByTransferId(transferIdToView);
+        consoleService.printTransactionToView(transaction);
 	}
 
 	private void viewPendingRequests() {

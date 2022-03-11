@@ -66,9 +66,9 @@ public class JdbcTransactionRecordDao implements TransactionRecordDao {
 
     private TransactionRecord mapRowToRecord(SqlRowSet rows) {
         TransactionRecord record = new TransactionRecord();
-        record.setAmount(rows.getInt("amount"));
         record.setTransferId(rows.getInt("transfer_id"));
         record.setUsername(rows.getString("username"));
+        record.setAmount(rows.getDouble("amount"));
         return record;
     }
 

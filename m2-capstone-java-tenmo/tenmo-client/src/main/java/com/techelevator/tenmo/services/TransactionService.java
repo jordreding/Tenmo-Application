@@ -32,5 +32,13 @@ public class TransactionService {
         return sentTransaction;
     }
 
+    public Transaction getTransactionByTransferId(int transferId) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(user.getToken());
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+        Transaction transaction = restTemplate.exchange(baseUrl + "account/" + user.getUser().getUsername() + "/transaction/" + transferId, HttpMethod.GET, entity, Transaction.class).getBody();
+        return transaction;
+    }
+
 
 }

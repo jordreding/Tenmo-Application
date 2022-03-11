@@ -7,4 +7,5 @@ import java.math.BigDecimal;
 public interface TransactionDao {
 
     Transaction createSentApprovedTransaction(Transaction transaction, String accountFromName);
+    Transaction getTransaction(int transferId);
 }
