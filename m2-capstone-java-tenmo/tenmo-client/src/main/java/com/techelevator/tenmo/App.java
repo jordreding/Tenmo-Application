@@ -17,6 +17,8 @@ public class App {
     private final AuthenticationService authenticationService = new AuthenticationService(API_BASE_URL);
     private final TransactionRecordService transactionRecordService = new TransactionRecordService(API_BASE_URL);
     private BigDecimal currentBalance;
+    private final BigDecimal USER_DOES_NOT_EXIST_AMOUNT = new BigDecimal(-5);
+
 
     private AuthenticatedUser currentUser;
 
@@ -82,7 +84,7 @@ public class App {
             } else if (menuSelection == 3) {
                 viewPendingRequests();
             } else if (menuSelection == 4) {
-                listUsers();
+               // listUsers();
                 sendBucks();
             } else if (menuSelection == 5) {
                 requestBucks();
@@ -114,19 +116,25 @@ public class App {
 		
 	}
 
-    private void listUsers() {
-        List<User> userList = accountService.getAllUsersNotCurrentUser();
-        consoleService.printAllUsersNotCurrentUser(userList);
-    }
+//    private void listUsers() {
+//        List<User> userList = accountService.getAllUsersNotCurrentUser();
+//        consoleService.printAllUsersNotCurrentUser(userList);
+//    }
 
 	private void sendBucks() {
+        List<User> userList = accountService.getAllUsersNotCurrentUser();
+        consoleService.printAllUsersNotCurrentUser(userList);
         BigDecimal balance = accountService.getBalance();
         currentBalance = balance;
-        Transaction transaction = consoleService.getTransactionFromUser(currentBalance);
-        if (transaction.getAmount().compareTo(new BigDecimal(0)) == 1) {
-            transactionService.addSendTransaction(transaction);
+        Transaction transaction = consoleService.getTransactionFromUser(currentBalance, userList);
+        if (transaction.getAmount().compareTo(USER_DOES_NOT_EXIST_AMOUNT) != 0) {
+            if (transaction.getAmount().compareTo(new BigDecimal(0)) == 1) {
+                transactionService.addSendTransaction(transaction);
+            } else {
+                consoleService.printInsufficientOrNegativeAmount();
+            }
         } else {
-            consoleService.printInsufficientOrNegativeAmount();
+            consoleService.printNonexistentUser();
         }
 	}
 

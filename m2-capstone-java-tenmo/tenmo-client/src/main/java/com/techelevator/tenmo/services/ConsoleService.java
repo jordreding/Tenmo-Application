@@ -14,6 +14,7 @@ import java.util.Scanner;
 public class ConsoleService {
 
     private final Scanner scanner = new Scanner(System.in);
+    private final BigDecimal USER_DOES_NOT_EXIST_AMOUNT = new BigDecimal(-5);
 
     public int promptForMenuSelection(String prompt) {
         int menuSelection;
@@ -113,18 +114,31 @@ public class ConsoleService {
         System.out.println("-----------------------------");
     }
 
-    public Transaction getTransactionFromUser(BigDecimal currentBalance) {
+    public Transaction getTransactionFromUser(BigDecimal currentBalance, List<User> userList) {
         Transaction transaction = new Transaction();
         transaction.setUserIdTo(promptForInt("Enter ID of user you are sending to (0 to cancel): "));
         BigDecimal amount = promptForBigDecimal("Enter amount: ");
         if (hasSufficientFunds(amount, currentBalance) && isNotZeroOrNegative(amount)) {
-            transaction.setAmount(amount);
+            if (userListContainsUserToSend(userList, transaction.getUserIdTo())) {
+                transaction.setAmount(amount);
+            } else {
+                transaction.setAmount(USER_DOES_NOT_EXIST_AMOUNT);
+            }
         } else {
             transaction.setAmount(new BigDecimal(0));
         }
         transaction.setTransfer_status_id(2);
         transaction.setTransfer_type_id(2);
         return transaction;
+    }
+
+    private boolean userListContainsUserToSend(List<User> userList, int userId) {
+        for (User user: userList) {
+            if (user.getId() == userId) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean hasSufficientFunds(BigDecimal amount, BigDecimal currentBalance) {
@@ -137,6 +151,10 @@ public class ConsoleService {
 
     public void printInsufficientOrNegativeAmount() {
         System.out.println("Please enter a positive number less than your current balance.");
+    }
+
+    public void printNonexistentUser() {
+        System.out.println("Please enter a user Id from the list above.");
     }
 
     public void printTransactionRecords(List<TransactionRecord> records) {
