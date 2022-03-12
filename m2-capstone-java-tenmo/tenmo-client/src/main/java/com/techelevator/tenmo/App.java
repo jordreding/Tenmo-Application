@@ -14,7 +14,6 @@ public class App {
     private final AccountService accountService = new AccountService(API_BASE_URL);
     private final TransactionService transactionService = new TransactionService(API_BASE_URL);
     private final AuthenticationService authenticationService = new AuthenticationService(API_BASE_URL);
-    private final TransactionRecordService transactionRecordService = new TransactionRecordService(API_BASE_URL);
     private BigDecimal currentBalance;
     private final BigDecimal USER_DOES_NOT_EXIST_AMOUNT = new BigDecimal(-5);
 
@@ -67,7 +66,6 @@ public class App {
         } else {
             accountService.setUser(currentUser);
             transactionService.setUser(currentUser);
-            transactionRecordService.setUser(currentUser);
         }
     }
 
@@ -103,10 +101,10 @@ public class App {
 	}
 
 	private void viewTransferHistory() {
-		List<TransactionRecord> transactionRecords = transactionRecordService.getAllApprovedTransactionRecords();
-        consoleService.printApprovedTransactionRecords(transactionRecords);
+		List<Transaction> transactions = transactionService.getAllApprovedTransactionRecords();
+        consoleService.printApprovedTransactionRecords(transactions);
         int transferIdToView = consoleService.promptForInt("Please Enter Transfer ID to view details (0 to cancel): ");
-        if (transactionService.transferIdExists(transactionRecords, transferIdToView)) {
+        if (transactionService.transferIdExists(transactions, transferIdToView)) {
             Transaction transaction = transactionService.getTransactionByTransferId(transferIdToView);
             consoleService.printTransactionToView(transaction);
         } else {
@@ -115,15 +113,19 @@ public class App {
 	}
 
 	private void viewPendingRequests() {
-        List<TransactionRecord> transactionRecords = transactionRecordService.getAllPendingTransactionRecords();
-        consoleService.printPendingTransactionRecords(transactionRecords);
-        int transferIdToView = consoleService.promptForInt("Please Enter Transfer ID to view details (0 to cancel): ");
-        if (transactionService.transferIdExists(transactionRecords, transferIdToView)) {
+        List<Transaction> transactions = transactionService.getAllPendingTransactionRecords();
+        consoleService.printPendingTransactionRecords(transactions);
+        int transferIdToView = consoleService.promptForInt("Please enter transfer ID to approve/reject (0 to cancel): ");
+        if (transactionService.transferIdExists(transactions, transferIdToView)) {
             Transaction transaction = transactionService.getTransactionByTransferId(transferIdToView);
-            consoleService.printTransactionToView(transaction);
+ //           consoleService.printTransactionToView(transaction);
+            int approveRejectChoice = consoleService.promptForInt("1: Approve\n2: Reject\n0: Don't approve or reject\n" +
+                    "---------\n" + "Please choose an option: ");
+            transactionService.approveOrReject(transaction, approveRejectChoice);
         } else {
             consoleService.transactionIdDoesNotExists();
         }
+
 	}
 
 	private void sendBucks() {
@@ -143,7 +145,7 @@ public class App {
         consoleService.printAllUsersNotCurrentUser(userList);
         Transaction requestTransaction = consoleService.buildPendingTransactionFromUser(userList);
         if (consoleService.ensureValidAmount(requestTransaction)) {
-            transactionService.addSendTransaction(requestTransaction);
+            transactionService.addRequestTransaction(requestTransaction);
         }
     }
 

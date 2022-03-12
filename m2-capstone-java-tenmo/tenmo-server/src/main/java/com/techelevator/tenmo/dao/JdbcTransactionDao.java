@@ -1,6 +1,7 @@
 package com.techelevator.tenmo.dao;
 
 import com.techelevator.tenmo.model.Transaction;
+import com.techelevator.tenmo.model.Transaction;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.math.BigDecimal;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class JdbcTransactionDao implements TransactionDao {
@@ -47,19 +50,29 @@ public class JdbcTransactionDao implements TransactionDao {
                 " account_to, amount) VALUES (?, ?, ?, ?, ?) RETURNING transfer_id";
         Long id = jdbcTemplate.queryForObject(sql, Long.class, transaction.getTransfer_type_id(), transaction.getTransfer_status_id(),
                 accountFrom, accountTo, transaction.getAmount());
+        transaction.setAccountFrom(accountFrom);
+        transaction.setUserIdTo(accountTo);
         transaction.setTransferId(id);
+        getNamesForTransactionByAccountId(transaction);
         return transaction;
     }
 
     @Override
-    public void updateRequestedPendingTransaction(int transferId, int userUpdateChoice) {
-        if (userUpdateChoice == 1) {
-            BigDecimal amount = getAmountFromTransferId(transferId);
-            int userAccount = getSenderAccount(transferId);
-            int recipientAccount = getRecipientAccount(transferId);
-            requestedPendingTransactionApproved(amount, transferId, userAccount, recipientAccount);
-        }
+    public void approvePendingTransaction(Transaction transaction) {
+        String sql = "UPDATE transfer " +
+                "SET transfer_status_id = ?, account_to = ?, account_from = ? " +
+                "WHERE transfer_id = ?";
+        jdbcTemplate.update(sql, 2, transaction.getAccountFrom(), transaction.getUserIdTo(), transaction.getTransferId());
+        subtractFromSendersAccount(transaction.getAmount(), transaction.getUserIdTo());
+        addToRecipientAccount(transaction.getAmount(), transaction.getAccountFrom());
+    }
 
+    @Override
+    public void rejectPendingTransaction(Transaction transaction) {
+        String sql = "UPDATE transfer " +
+                "SET transfer_status_id = ? " +
+                "WHERE transfer_id = ?";
+        jdbcTemplate.update(sql, 3, transaction.getTransferId());
     }
 
     @Override
@@ -76,31 +89,58 @@ public class JdbcTransactionDao implements TransactionDao {
         throw new UsernameNotFoundException("TransferId: " + transferId + " was not found.");
     }
 
-    private BigDecimal getAmountFromTransferId(int transferId) {
-        String sql = "SELECT amount FROM transfer WHERE transfer_id = ?;";
-        BigDecimal amount = new BigDecimal(jdbcTemplate.queryForObject(sql, Double.class, transferId));
-        return amount;
+    @Override
+    public List<Transaction> getAllApprovedTransactions(String username){
+        List<Transaction> fullListOfTransaction = new ArrayList<>();
+        List<Transaction> transactionsSentToUser = getTransactionsSentToUser(username, 2);
+        List<Transaction> transactionsSentFromUser = getTransactionsSentFromUser(username,2);
+        fullListOfTransaction.addAll(transactionsSentFromUser);
+        fullListOfTransaction.addAll(transactionsSentToUser);
+        return fullListOfTransaction;
+
     }
 
-    private void requestedPendingTransactionApproved(BigDecimal amount, int transferId, int senderAccountId, int recipientAccountId) {
-        String sql = "UPDATE transfer " +
-                "SET transfer_status_id = ? " +
-                "WHERE transfer_id = ?";
-        jdbcTemplate.update(sql, 2, transferId);
-        subtractFromSendersAccount(amount, senderAccountId);
-        addToRecipientAccount(amount, recipientAccountId);
+    @Override
+    public List<Transaction> getAllPendingTransactions(String username) {
+        List<Transaction> fullListOfTransaction = new ArrayList<>();
+        List<Transaction> transactionsSentFromUser = getTransactionsSentToUser(username, 1);
+        fullListOfTransaction.addAll(transactionsSentFromUser);
+        return fullListOfTransaction;
     }
 
-    private int getSenderAccount(int transferId) {
-        String sql = "SELECT account_from FROM transfer WHERE transfer_id = ?";
-        Integer accountFrom = jdbcTemplate.queryForObject(sql, Integer.class, transferId);
-        return accountFrom;
+    private List<Transaction> getTransactionsSentToUser(String username, int statusId) {
+        List<Transaction> transactionsSentToUser = new ArrayList<>();
+        int accountNumber = getAccountIdFromUsername(username);
+
+        String sql = "SELECT transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, username, amount FROM transfer " +
+                "JOIN account ON account.account_id = transfer.account_to " +
+                "JOIN tenmo_user ON tenmo_user.user_id = account.user_id " +
+                "WHERE account_to = ? AND transfer_status_id = ?";
+        SqlRowSet rows = jdbcTemplate.queryForRowSet(sql, accountNumber, statusId);
+        while (rows.next()) {
+            Transaction record = mapRowToTransaction(rows);
+            record.setTransferType("FROM");
+            getNamesForTransactionByAccountId(record);
+            transactionsSentToUser.add(record);
+        }
+        return transactionsSentToUser;
     }
 
-    private int getRecipientAccount(int transferId) {
-        String sql = "SELECT account_to FROM transfer WHERE transfer_id = ?";
-        Integer accountTo = jdbcTemplate.queryForObject(sql, Integer.class, transferId);
-        return accountTo;
+    private List<Transaction> getTransactionsSentFromUser(String username, int statusId) {
+        List<Transaction> transactionsSentToUser = new ArrayList<>();
+        int accountNumber = getAccountIdFromUsername(username);
+        String sql = "SELECT transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, username, amount FROM transfer " +
+                "JOIN account ON account.account_id = transfer.account_from " +
+                "JOIN tenmo_user ON tenmo_user.user_id = account.user_id " +
+                "WHERE account_from = ? AND transfer_status_id = ?";
+        SqlRowSet rows = jdbcTemplate.queryForRowSet(sql, accountNumber, statusId);
+        while (rows.next()) {
+            Transaction record = mapRowToTransaction(rows);
+            record.setTransferType("TO");
+            getNamesForTransactionByAccountId(record);
+            transactionsSentToUser.add(record);
+        }
+        return transactionsSentToUser;
     }
 
     private int getAccountIdFromUsername(String username) {
@@ -142,12 +182,12 @@ public class JdbcTransactionDao implements TransactionDao {
         return transaction;
     }
 
-    private String getNameByAccountId(int userId) {
+    private String getNameByAccountId(int accountId) {
         String sql = "SELECT username from tenmo_user " +
                 "JOIN account ON tenmo_user.user_id = account.user_id " +
                 "WHERE account_id = ?";
 
-        String username = jdbcTemplate.queryForObject(sql, String.class, userId);
+        String username = jdbcTemplate.queryForObject(sql, String.class, accountId);
         return username;
     }
 

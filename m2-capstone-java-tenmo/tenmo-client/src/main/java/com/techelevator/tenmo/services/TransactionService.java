@@ -2,13 +2,13 @@ package com.techelevator.tenmo.services;
 
 import com.techelevator.tenmo.model.AuthenticatedUser;
 import com.techelevator.tenmo.model.Transaction;
-import com.techelevator.tenmo.model.TransactionRecord;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpHeaders;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class TransactionService {
@@ -54,8 +54,41 @@ public class TransactionService {
         return transaction;
     }
 
-    public boolean transferIdExists(List<TransactionRecord> records, int transferId) {
-        for (TransactionRecord record : records) {
+    public List<Transaction> getAllPendingTransactionRecords() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(user.getToken());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+        String username = user.getUser().getUsername();
+        Transaction[] pendingTransactions = restTemplate.exchange(baseUrl + "account/" + username + "/transaction/pending", HttpMethod.GET, entity, Transaction[].class).getBody();
+        return Arrays.asList(pendingTransactions);
+    }
+
+    public List<Transaction> getAllApprovedTransactionRecords() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(user.getToken());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+        String username = user.getUser().getUsername();
+        Transaction[] transaction = restTemplate.exchange(baseUrl + "account/" + username + "/transaction/approved", HttpMethod.GET, entity, Transaction[].class).getBody();
+        return Arrays.asList(transaction);
+    }
+
+    public void approveOrReject(Transaction transaction, int userDecision) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(user.getToken());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Transaction> entity = new HttpEntity<Transaction>(transaction, headers);
+        String username = user.getUser().getUsername();
+        if (userDecision == 1) {
+            restTemplate.exchange(baseUrl + "account/" + username + "/transaction/request/"+ transaction.getTransferId() +"/approved", HttpMethod.PUT, entity, Transaction.class);
+        } else if (userDecision == 2) {
+            restTemplate.exchange(baseUrl + "account/" + username + "/transaction/request/"+ transaction.getTransferId() +"/rejected", HttpMethod.PUT, entity, Transaction.class);
+        }
+    }
+
+    public boolean transferIdExists(List<Transaction> records, int transferId) {
+        for (Transaction record : records) {
             if (record.getTransferId() == transferId) {
                 return true;
             }

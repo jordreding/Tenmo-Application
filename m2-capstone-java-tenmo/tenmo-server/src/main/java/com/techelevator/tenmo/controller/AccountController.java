@@ -1,20 +1,15 @@
 package com.techelevator.tenmo.controller;
 
-import ch.qos.logback.core.db.BindDataSourceToJNDIAction;
 import com.techelevator.tenmo.dao.AccountDao;
 import com.techelevator.tenmo.dao.TransactionDao;
-import com.techelevator.tenmo.dao.TransactionRecordDao;
 import com.techelevator.tenmo.dao.UserDao;
-import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.Transaction;
-import com.techelevator.tenmo.model.TransactionRecord;
 import com.techelevator.tenmo.model.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.nio.file.attribute.UserPrincipalNotFoundException;
 import java.security.Principal;
 import java.util.List;
 
@@ -24,14 +19,12 @@ public class AccountController {
 
     private AccountDao accountDao;
     private TransactionDao transactionDao;
-    private TransactionRecordDao transactionRecordDao;
     private UserDao userDao;
 
-    public AccountController(AccountDao accountDao, UserDao userDao, TransactionDao transactionDao, TransactionRecordDao transactionRecordDao) {
+    public AccountController(AccountDao accountDao, UserDao userDao, TransactionDao transactionDao) {
         this.accountDao = accountDao;
         this.userDao = userDao;
         this.transactionDao = transactionDao;
-        this.transactionRecordDao = transactionRecordDao;
     }
 
     @RequestMapping(path="/account/{username}/balance", method = RequestMethod.GET)
@@ -50,13 +43,13 @@ public class AccountController {
     }
 
     @RequestMapping(path="/account/{username}/transaction/approved", method = RequestMethod.GET)
-    public List<TransactionRecord> getRecordOfUserApprovedTransactions(@PathVariable String username, Principal principal) {
-        return transactionRecordDao.getAllApprovedTransactions(principal.getName());
+    public List<Transaction> getRecordOfUserApprovedTransactions(@PathVariable String username, Principal principal) {
+        return transactionDao.getAllApprovedTransactions(principal.getName());
     }
 
     @RequestMapping(path="/account/{username}/transaction/pending", method = RequestMethod.GET)
-    public List<TransactionRecord> getRecordOfUserPendingTransactions(@PathVariable String username, Principal principal) {
-        return transactionRecordDao.getAllPendingTransactions(principal.getName());
+    public List<Transaction> getRecordOfUserPendingTransactions(@PathVariable String username, Principal principal) {
+        return transactionDao.getAllPendingTransactions(principal.getName());
     }
 
     @RequestMapping(path="/account/{username}/transaction/{transferId}", method = RequestMethod.GET)
@@ -71,9 +64,15 @@ public class AccountController {
     }
 
     @ResponseStatus(HttpStatus.ACCEPTED)
-    @RequestMapping(path = "/account/{username}/transaction/request/{transferId}", method = RequestMethod.PUT)
-    public void updateRequest(@PathVariable String username, @RequestBody int userChoice, @PathVariable int transferId, Principal principal) {
-        transactionDao.updateRequestedPendingTransaction(transferId, userChoice);
+    @RequestMapping(path = "/account/{username}/transaction/request/{transferId}/approved", method = RequestMethod.PUT)
+    public void approveRequest(@PathVariable String username, @RequestBody Transaction transaction, @PathVariable int transferId) {
+        transactionDao.approvePendingTransaction(transaction);
+    }
+
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @RequestMapping(path = "/account/{username}/transaction/request/{transferId}/rejected", method = RequestMethod.PUT)
+    public void rejectRequest(@PathVariable String username, @RequestBody Transaction transaction, @PathVariable int transferId) {
+        transactionDao.rejectPendingTransaction(transaction);
     }
 
 

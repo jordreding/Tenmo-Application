@@ -10,6 +10,7 @@ public class Transaction {
     private String toName;
     private int accountFrom;
     private int userIdTo;
+    private String transferType;
     private BigDecimal amount;
 
     public long getTransferId() {
@@ -74,5 +75,13 @@ public class Transaction {
 
     public void setToName(String toName) {
         this.toName = toName;
+    }
+
+    public String getTransferType() {
+        return transferType;
+    }
+
+    public void setTransferType(String transferType) {
+        this.transferType = transferType;
     }
 }

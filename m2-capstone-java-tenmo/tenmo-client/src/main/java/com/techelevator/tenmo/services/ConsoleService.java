@@ -2,12 +2,10 @@ package com.techelevator.tenmo.services;
 
 
 import com.techelevator.tenmo.model.Transaction;
-import com.techelevator.tenmo.model.TransactionRecord;
 import com.techelevator.tenmo.model.User;
 import com.techelevator.tenmo.model.UserCredentials;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Scanner;
 
@@ -198,28 +196,35 @@ public class ConsoleService {
         System.out.println("Please enter a user Id from the list above.");
     }
 
-    public void printApprovedTransactionRecords(List<TransactionRecord> records) {
+    public void printApprovedTransactionRecords(List<Transaction> records) {
         System.out.println("--------------------------------------------------------");
         System.out.println("Transfers");
         System.out.printf("%-15s%-25s%-40s\n", "ID", "From/To", "Amount");
         System.out.println("--------------------------------------------------------");
-
-        for (TransactionRecord record : records) {
-            System.out.printf("%-15s%-4s: %-19s$ %-10.2f\n", record.getTransferId(), record.getTransferType(), record.getUsername(), record.getAmount());
+        for (Transaction record : records) {
+            String transferType = record.getTransferType();
+            String toName = record.getToName();
+            String fromName = record.getFromName();
+            if (record.getTransferType().equalsIgnoreCase("TO")) {
+                System.out.printf("%-15s%-4s: %-19s$ %-10.2f\n", record.getTransferId(), transferType, toName, record.getAmount());
+            } else {
+                System.out.printf("%-15s%-4s: %-19s$ %-10.2f\n", record.getTransferId(), transferType, fromName, record.getAmount());
+            }
         }
         System.out.println("-----------------------------");
     }
 
-    public void printPendingTransactionRecords(List<TransactionRecord> records) {
+    public void printPendingTransactionRecords(List<Transaction> records) {
         System.out.println("--------------------------------------------------------");
         System.out.println("Pending Transfers");
-        System.out.printf("%-15s%-25s%-40s\n", "ID", "To", "Amount");
+        System.out.printf("%-19s%-25s%-40s\n", "ID", "To", "Amount");
         System.out.println("--------------------------------------------------------");
 
-        for (TransactionRecord record : records) {
-            System.out.printf("%-19s%-19s$ %-10.2f\n", record.getTransferId(),  record.getUsername(), record.getAmount());
+        for (Transaction record : records) {
+            System.out.printf("%-19s%-25s$ %-10.2f\n", record.getTransferId(),  record.getFromName(), record.getAmount());
         }
         System.out.println("-----------------------------");
+
     }
 
     public void printTransactionToView(Transaction transaction) {
