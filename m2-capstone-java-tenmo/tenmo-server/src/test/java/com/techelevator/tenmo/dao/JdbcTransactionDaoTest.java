@@ -4,6 +4,7 @@ import com.techelevator.tenmo.model.Transaction;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.math.BigDecimal;
 import static org.junit.Assert.assertEquals;
@@ -16,7 +17,8 @@ public class JdbcTransactionDaoTest extends BaseDaoTests {
 
     @Before
     public void setup() {
-        dao = new JdbcTransactionDao(dataSource);
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        dao = new JdbcTransactionDao(jdbcTemplate);
         transaction.setAccountFrom(2001);
         transaction.setTransferId(123);
         transaction.setTransferType("TO");
@@ -42,7 +44,7 @@ public class JdbcTransactionDaoTest extends BaseDaoTests {
         transaction = dao.getTransaction(123);
 
         assertEquals("bob", transaction.getFromName());
-        assertEquals("2001", transaction.getAccountFrom());
+        assertEquals(2001, transaction.getAccountFrom());
     }
 
 }
