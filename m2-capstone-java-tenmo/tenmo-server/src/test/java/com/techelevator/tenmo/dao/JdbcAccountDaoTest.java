@@ -24,16 +24,7 @@ public class JdbcAccountDaoTest extends BaseDaoTests {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         dao = new JdbcAccountDao(jdbcTemplate);
         }
-
-    @Test
-    public void getAllAccounts_Should_return_all_accounts() {
-        List<Account> accounts = dao.getAllAccounts("testUserOne");
-
-        Assert.assertEquals(3, accounts.size());
-        Assert.assertEquals(1002, accounts.get(0).getUserId());
-        Assert.assertEquals(1003, accounts.get(1).getUserId());
-        Assert.assertEquals(1004, accounts.get(2).getUserId());
-    }
+        
 
     @Test
     public void getAccountBalance_should_return_balance() {

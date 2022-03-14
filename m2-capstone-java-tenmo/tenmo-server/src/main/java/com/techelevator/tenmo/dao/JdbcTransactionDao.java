@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.math.BigDecimal;
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +26,6 @@ public class JdbcTransactionDao implements TransactionDao {
     }
 
     @Override
-    @ResponseStatus(HttpStatus.CREATED)
     public Transaction createSentApprovedTransaction(Transaction transaction, String accountFromUsername) {
         int accountFrom = getAccountIdFromUsername(accountFromUsername);
         int accountTo = getAccountNumberFromUserId(transaction.getUserIdTo());
@@ -42,7 +40,6 @@ public class JdbcTransactionDao implements TransactionDao {
     }
 
     @Override
-    @ResponseStatus(HttpStatus.CREATED)
     public Transaction createRequestedPendingTransaction(Transaction transaction, String accountFromName) {
         int accountFrom = getAccountIdFromUsername(accountFromName);
         int accountTo = getAccountNumberFromUserId(transaction.getUserIdTo());
